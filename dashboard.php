@@ -1,5 +1,5 @@
 <?php
-// dashboard.php
+// dashboard.php - Dashibodi Kuu
 require_once 'config.php';
 require_once 'functions.php';
 
@@ -134,6 +134,129 @@ if($user['role'] === 'mwanakikundi' && isset($_GET['check_loan']) && isset($_GET
     <title><?php echo APP_NAME; ?> - Dashibodi</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Quick Actions Bar */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            align-items: center;
+        }
+        .quick-actions .label {
+            font-weight: 600;
+            color: var(--gray);
+            font-size: 14px;
+            margin-right: 8px;
+        }
+        .quick-actions .btn-api {
+            background: #8b5cf6;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .quick-actions .btn-api:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(139,92,246,0.3);
+        }
+        .quick-actions .btn-token {
+            background: #0d9488;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .quick-actions .btn-token:hover {
+            background: #0f766e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(13,148,136,0.3);
+        }
+        .quick-actions .btn-docs {
+            background: #6366f1;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .quick-actions .btn-docs:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+        }
+        .quick-actions .btn-chat {
+            background: #f59e0b;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .quick-actions .btn-chat:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(245,158,11,0.3);
+        }
+        .quick-actions .btn-mpesa {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .quick-actions .btn-mpesa:hover {
+            background: #43a047;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(76,175,80,0.3);
+        }
+        @media (max-width: 768px) {
+            .quick-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .quick-actions .label {
+                text-align: center;
+            }
+            .quick-actions a {
+                text-align: center;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -145,6 +268,34 @@ if($user['role'] === 'mwanakikundi' && isset($_GET['check_loan']) && isset($_GET
         <?php if(isset($_GET['error'])): ?>
             <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($_GET['error']); ?></div>
         <?php endif; ?>
+        
+        <!-- ============================================= -->
+        <!-- QUICK ACTIONS BAR - API GUIDE IMESHAINGIZWA -->
+        <!-- ============================================= -->
+        <div class="quick-actions">
+            <span class="label"><i class="fas fa-rocket"></i> Vitendo vya Haraka:</span>
+            
+            <!-- API Guide - Kitufe Kipya -->
+            <a href="api_guide.php" class="btn-api">
+                <i class="fas fa-code"></i> Mwongozo wa API
+            </a>
+            
+            <a href="api_token.php" class="btn-token">
+                <i class="fas fa-key"></i> API Token
+            </a>
+            
+            <a href="api_docs.php" class="btn-docs">
+                <i class="fas fa-book"></i> API Documentation
+            </a>
+            
+            <a href="chat.php" class="btn-chat">
+                <i class="fas fa-comment-dots"></i> Live Chat
+            </a>
+            
+            <a href="mpesa.php" class="btn-mpesa">
+                <i class="fas fa-mobile-alt"></i> M-PESA
+            </a>
+        </div>
         
         <!-- Stats -->
         <div class="stats-grid">
@@ -456,6 +607,9 @@ if($user['role'] === 'mwanakikundi' && isset($_GET['check_loan']) && isset($_GET
                 <a href="api_token.php" class="btn btn-outline" style="width: auto;">
                     <i class="fas fa-key"></i> API Token
                 </a>
+                <a href="api_guide.php" class="btn btn-outline" style="width: auto; border-color: #8b5cf6; color: #8b5cf6;">
+                    <i class="fas fa-code"></i> API Guide
+                </a>
             </div>
             
             <!-- Contribution Form -->
@@ -637,6 +791,29 @@ if($user['role'] === 'mwanakikundi' && isset($_GET['check_loan']) && isset($_GET
                 <?php endforeach; ?>
             </div>
         </div>
+        
+        <!-- ============================================= -->
+        <!-- API QUICK LINKS - Footer ya Dashboard -->
+        <!-- ============================================= -->
+        <div class="dashboard-card" style="border-left: 4px solid #8b5cf6; background: #f5f3ff;">
+            <h2><i class="fas fa-code" style="color: #8b5cf6;"></i> Viungo vya API</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                <a href="api_guide.php" class="btn btn-primary" style="width: auto; text-align: center; background: #8b5cf6; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-book"></i> Mwongozo wa API
+                </a>
+                <a href="api_token.php" class="btn btn-primary" style="width: auto; text-align: center; background: #0d9488; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-key"></i> Unda Token
+                </a>
+                <a href="api_docs.php" class="btn btn-primary" style="width: auto; text-align: center; background: #6366f1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-file-alt"></i> Documentation
+                </a>
+            </div>
+            <p style="margin-top: 12px; color: #64748b; font-size: 14px; text-align: center;">
+                <i class="fas fa-info-circle" style="color: #8b5cf6;"></i>
+                Tumia API kuunganisha mifumo yako na <?php echo APP_NAME; ?>
+            </p>
+        </div>
+        
     </div>
     
     <script>
