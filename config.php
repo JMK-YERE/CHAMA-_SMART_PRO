@@ -1,19 +1,18 @@
 <?php
-// config.php
+// config.php - Mipangilio ya mfumo
 session_start();
 
-// Load environment variables
-if(file_exists(__DIR__ . '/.env')) {
-    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-    $dotenv->load();
-}
+// ============================================
+// DATABASE CONFIGURATION - INFINITYFREE
+// ============================================
 
-// Database
-define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
-define('DB_USER', $_ENV['DB_USER'] ?? 'root');
-define('DB_PASS', $_ENV['DB_PASS'] ?? '');
-define('DB_NAME', $_ENV['DB_NAME'] ?? 'chama_smart_pro');
+// Database - InfinityFree (Badilisha na maelezo yako)
+define('DB_HOST', 'sql204.infinityfree.com');
+define('DB_USER', 'if0_42236866');
+define('DB_PASS', 'josephjonas123');
+define('DB_NAME', 'if0_42236866_chama_smart');
 
+// Database connection
 try {
     $pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME, DB_USER, DB_PASS);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -22,46 +21,59 @@ try {
     die("Database connection failed: " . $e->getMessage());
 }
 
-// App Settings
-define('APP_NAME', $_ENV['APP_NAME'] ?? 'CHAMA SMART PRO');
+// ============================================
+// APP SETTINGS
+// ============================================
+
+define('APP_NAME', 'CHAMA SMART');
 define('APP_VERSION', '5.0.0');
-define('APP_URL', $_ENV['APP_URL'] ?? 'https://yourdomain.com');
-define('APP_EMAIL', $_ENV['APP_EMAIL'] ?? 'info@yourdomain.com');
-define('APP_PHONE', $_ENV['APP_PHONE'] ?? '+255712345678');
+define('APP_URL', 'https://yourdomain.infinityfreeapp.com'); // Badilisha na domain yako
+define('APP_EMAIL', 'info@yourdomain.com');
+define('APP_PHONE', '+255712345678');
 define('TIMEZONE', 'Africa/Dar_es_Salaam');
 
 date_default_timezone_set(TIMEZONE);
 
-// M-PESA
-define('MPESA_ENVIRONMENT', $_ENV['MPESA_ENVIRONMENT'] ?? 'sandbox');
-define('MPESA_CONSUMER_KEY', $_ENV['MPESA_CONSUMER_KEY'] ?? '');
-define('MPESA_CONSUMER_SECRET', $_ENV['MPESA_CONSUMER_SECRET'] ?? '');
-define('MPESA_PASSKEY', $_ENV['MPESA_PASSKEY'] ?? '');
-define('MPESA_SHORTCODE', $_ENV['MPESA_SHORTCODE'] ?? '174379');
+// ============================================
+// M-PESA (Weka baada ya kupata credentials)
+// ============================================
+
+define('MPESA_ENVIRONMENT', 'sandbox');
+define('MPESA_CONSUMER_KEY', 'your_consumer_key');
+define('MPESA_CONSUMER_SECRET', 'your_consumer_secret');
+define('MPESA_PASSKEY', 'your_passkey');
+define('MPESA_SHORTCODE', '174379');
 define('MPESA_CALLBACK_URL', APP_URL . '/mpesa_callback.php');
 
-// Africa's Talking
-define('AT_USERNAME', $_ENV['AT_USERNAME'] ?? '');
-define('AT_API_KEY', $_ENV['AT_API_KEY'] ?? '');
-define('AT_SHORTCODE', $_ENV['AT_SHORTCODE'] ?? '');
+// ============================================
+// Africa's Talking (SMS)
+// ============================================
 
-// WhatsApp
+define('AT_USERNAME', 'your_username');
+define('AT_API_KEY', 'your_api_key');
+define('AT_SHORTCODE', 'your_shortcode');
+
+// ============================================
+// WhatsApp Business API
+// ============================================
+
 define('WHATSAPP_API_URL', 'https://graph.facebook.com/v18.0/');
-define('WHATSAPP_PHONE_NUMBER_ID', $_ENV['WHATSAPP_PHONE_NUMBER_ID'] ?? '');
-define('WHATSAPP_ACCESS_TOKEN', $_ENV['WHATSAPP_ACCESS_TOKEN'] ?? '');
+define('WHATSAPP_PHONE_NUMBER_ID', 'your_phone_number_id');
+define('WHATSAPP_ACCESS_TOKEN', 'your_access_token');
 
-// Zoom
-define('ZOOM_API_KEY', $_ENV['ZOOM_API_KEY'] ?? '');
-define('ZOOM_API_SECRET', $_ENV['ZOOM_API_SECRET'] ?? '');
-define('ZOOM_ACCOUNT_ID', $_ENV['ZOOM_ACCOUNT_ID'] ?? '');
+// ============================================
+// Zoom API
+// ============================================
 
+define('ZOOM_API_KEY', 'your_zoom_api_key');
+define('ZOOM_API_SECRET', 'your_zoom_api_secret');
+define('ZOOM_ACCOUNT_ID', 'your_zoom_account_id');
+
+// ============================================
 // Jitsi
-define('JITSI_URL', $_ENV['JITSI_URL'] ?? 'https://meet.jit.si/');
+// ============================================
 
-// Include Composer autoload
-if(file_exists(__DIR__ . '/vendor/autoload.php')) {
-    require_once __DIR__ . '/vendor/autoload.php';
-}
+define('JITSI_URL', 'https://meet.jit.si/');
 
 // ============================================
 // CORE FUNCTIONS
