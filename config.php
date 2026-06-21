@@ -27,7 +27,7 @@ try {
 
 define('APP_NAME', 'CHAMA SMART');
 define('APP_VERSION', '5.0.0');
-define('APP_URL', 'https://yourdomain.infinityfreeapp.com'); // Badilisha na domain yako
+define('APP_URL', 'https://jmk.ifree.page'); // Domain
 define('APP_EMAIL', 'info@yourdomain.com');
 define('APP_PHONE', '+255712345678');
 define('TIMEZONE', 'Africa/Dar_es_Salaam');
