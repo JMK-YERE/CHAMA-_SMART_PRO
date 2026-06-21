@@ -1,0 +1,23 @@
+{
+    "name": "chama_smart/pro",
+    "description": "CHAMA SMART PRO - Complete Group Management System with Live Chat & API",
+    "type": "project",
+    "require": {
+        "dompdf/dompdf": "^2.0",
+        "phpoffice/phpspreadsheet": "^1.29",
+        "mpdf/mpdf": "^8.2",
+        "twilio/sdk": "^7.0",
+        "vlucas/phpdotenv": "^5.5"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "CHAMA SMART Team",
+            "email": "info@chamasmart.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "config": {
+        "optimize-autoloader": true
+    }
+}
