@@ -1,0 +1,17 @@
+# .gitignore
+vendor/
+.env
+*.log
+*.sql
+*.sql.gz
+.DS_Store
+node_modules/
+composer.lock
+.idea/
+.vscode/
+*.cache
+*.tmp
+*.bak
+*.zip
+*.tar.gz
+Thumbs.db
