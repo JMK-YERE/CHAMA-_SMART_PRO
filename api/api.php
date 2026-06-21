@@ -775,4 +775,192 @@ switch($endpoint) {
     // NOTIFICATIONS
     // ======================
     case 'notifications':
-        if($method !== 'GET') apiError('Method not allowed. Use GET', 
+        if($method !== 'GET') apiError('Method not allowed. Use GET', 405);
+        
+        $stmt = $pdo->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 20");
+        $stmt->execute([$user['id']]);
+        $notifications = $stmt->fetchAll();
+        
+        // Mark as read
+        $stmt = $pdo->prepare("UPDATE notifications SET sent = 1 WHERE user_id = ? AND sent = 0");
+        $stmt->execute([$user['id']]);
+        
+        apiResponse($notifications);
+        break;
+        
+    case 'notifications/mark_read':
+        if($method !== 'POST') apiError('Method not allowed. Use POST', 405);
+        
+        $stmt = $pdo->prepare("UPDATE notifications SET sent = 1 WHERE user_id = ?");
+        $stmt->execute([$user['id']]);
+        
+        apiResponse(['message' => 'All notifications marked as read']);
+        break;
+        
+    // ======================
+    // MEETINGS
+    // ======================
+    case 'meetings':
+        if($method !== 'GET') apiError('Method not allowed. Use GET', 405);
+        
+        $stmt = $pdo->prepare("SELECT m.*, a.status as attendance_status 
+                              FROM meetings m 
+                              LEFT JOIN meeting_attendees a ON m.id = a.meeting_id AND a.member_id = ?
+                              WHERE m.status = 'scheduled' OR m.status = 'ongoing'
+                              ORDER BY m.meeting_date ASC");
+        $stmt->execute([$user['id']]);
+        $meetings = $stmt->fetchAll();
+        
+        apiResponse($meetings);
+        break;
+        
+    case 'meetings/join':
+        if($method !== 'POST') apiError('Method not allowed. Use POST', 405);
+        
+        $meeting_id = intval($request_data['meeting_id'] ?? $_POST['meeting_id'] ?? 0);
+        if($meeting_id <= 0) apiError('Invalid meeting ID');
+        
+        $stmt = $pdo->prepare("UPDATE meeting_attendees SET status = 'confirmed', joined_at = NOW() 
+                              WHERE meeting_id = ? AND member_id = ?");
+        if($stmt->execute([$meeting_id, $user['id']])) {
+            apiResponse(['message' => 'Meeting joined successfully']);
+        } else {
+            apiError('Failed to join meeting');
+        }
+        break;
+        
+    // ======================
+    // DASHBOARD STATS
+    // ======================
+    case 'stats':
+        if($method !== 'GET') apiError('Method not allowed. Use GET', 405);
+        
+        $totals = getTotals();
+        $my_loans = getMemberLoans($user['id']);
+        $my_debt = array_sum(array_column($my_loans, 'amount')) - array_sum(array_column($my_loans, 'repaid'));
+        $my_contributions = getContributions($user['id']);
+        $total_contrib = array_sum(array_column($my_contributions, 'amount'));
+        
+        // Get recent activity
+        $stmt = $pdo->prepare("SELECT 'contribution' as type, amount, date as activity_date, 'Chango' as description 
+                              FROM chango WHERE member_id = ? ORDER BY date DESC LIMIT 5");
+        $stmt->execute([$user['id']]);
+        $recent = $stmt->fetchAll();
+        
+        apiResponse([
+            'total_funds' => $totals['total_funds'],
+            'total_loans' => $totals['total_loans'],
+            'total_repaid' => $totals['total_repaid'],
+            'total_members' => $totals['total_members'],
+            'my_savings' => $user['savings'],
+            'my_debt' => $my_debt,
+            'my_contributions' => $total_contrib,
+            'my_loan_count' => count($my_loans),
+            'recent_activity' => $recent,
+            'overdue_loans' => $totals['overdue_loans']
+        ]);
+        break;
+        
+    // ======================
+    // REPORTS (For leaders)
+    // ======================
+    case 'reports/members':
+        if($method !== 'GET') apiError('Method not allowed. Use GET', 405);
+        
+        if(!in_array($user['role'], ['mhazina', 'mwenyekiti', 'mkaguzi', 'katibu'])) {
+            apiError('Unauthorized', 403);
+        }
+        
+        $members = getMembers();
+        $result = [];
+        foreach($members as $member) {
+            $loans = getMemberLoans($member['id']);
+            $total_loan = array_sum(array_column($loans, 'amount'));
+            $total_repaid = array_sum(array_column($loans, 'repaid'));
+            $result[] = [
+                'id' => $member['id'],
+                'name' => $member['first_name'] . ' ' . $member['last_name'],
+                'phone' => $member['phone'],
+                'role' => $member['role'],
+                'status' => $member['status'],
+                'savings' => $member['savings'],
+                'total_loan' => $total_loan,
+                'total_debt' => $total_loan - $total_repaid,
+                'join_date' => $member['join_date']
+            ];
+        }
+        apiResponse($result);
+        break;
+        
+    case 'reports/loans':
+        if($method !== 'GET') apiError('Method not allowed. Use GET', 405);
+        
+        if(!in_array($user['role'], ['mhazina', 'mwenyekiti', 'mkaguzi'])) {
+            apiError('Unauthorized', 403);
+        }
+        
+        $status = $_GET['status'] ?? null;
+        $loans = getLoans($status);
+        apiResponse($loans);
+        break;
+        
+    case 'reports/contributions':
+        if($method !== 'GET') apiError('Method not allowed. Use GET', 405);
+        
+        if(!in_array($user['role'], ['mhazina', 'mwenyekiti', 'mkaguzi'])) {
+            apiError('Unauthorized', 403);
+        }
+        
+        $member_id = intval($_GET['member_id'] ?? 0);
+        $contributions = getContributions($member_id > 0 ? $member_id : null);
+        apiResponse($contributions);
+        break;
+        
+    // ======================
+    // SETTINGS (For leaders)
+    // ======================
+    case 'settings':
+        if($method !== 'GET') apiError('Method not allowed. Use GET', 405);
+        
+        if(!in_array($user['role'], ['mwenyekiti', 'mhazina'])) {
+            apiError('Unauthorized', 403);
+        }
+        
+        $settings = getLoanSettings();
+        apiResponse($settings);
+        break;
+        
+    case 'settings/update':
+        if($method !== 'POST' && $method !== 'PUT') apiError('Method not allowed. Use POST or PUT', 405);
+        
+        if(!in_array($user['role'], ['mwenyekiti', 'mhazina'])) {
+            apiError('Unauthorized', 403);
+        }
+        
+        $max_loan_percentage = floatval($request_data['max_loan_percentage'] ?? $_POST['max_loan_percentage'] ?? 70);
+        $max_loan_income_percentage = floatval($request_data['max_loan_income_percentage'] ?? $_POST['max_loan_income_percentage'] ?? 50);
+        $default_interest_rate = floatval($request_data['default_interest_rate'] ?? $_POST['default_interest_rate'] ?? 5);
+        $min_contributions_required = intval($request_data['min_contributions_required'] ?? $_POST['min_contributions_required'] ?? 3);
+        $contribution_period_months = intval($request_data['contribution_period_months'] ?? $_POST['contribution_period_months'] ?? 6);
+        
+        $stmt = $pdo->prepare("INSERT INTO viwango_vya_mkopo 
+                              (max_loan_percentage, max_loan_income_percentage, default_interest_rate, 
+                               min_contributions_required, contribution_period_months, updated_by) 
+                              VALUES (?, ?, ?, ?, ?, ?)");
+        if($stmt->execute([$max_loan_percentage, $max_loan_income_percentage, $default_interest_rate, 
+                           $min_contributions_required, $contribution_period_months, $user['id']])) {
+            logActivity($user['id'], 'API Update Settings', "New settings saved");
+            apiResponse(['message' => 'Settings updated successfully']);
+        } else {
+            apiError('Failed to update settings');
+        }
+        break;
+        
+    // ======================
+    // DEFAULT - Endpoint not found
+    // ======================
+    default:
+        apiError('Endpoint not found: ' . $endpoint, 404);
+        break;
+}
+?>
