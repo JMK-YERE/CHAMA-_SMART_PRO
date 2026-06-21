@@ -318,3 +318,332 @@ if($user['role'] === 'mwanakikundi' && isset($_GET['check_loan']) && isset($_GET
                     <i class="fas fa-file-pdf"></i> PDF
                 </a>
                 <a href="reports.php?type=members&format=csv" class="btn btn-sm btn-outline">
+                    <i class="fas fa-file-excel"></i> CSV
+                </a>
+                <button onclick="window.print()" class="btn btn-sm btn-outline">
+                    <i class="fas fa-print"></i> Chapisha
+                </button>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Mwanakikundi Self View -->
+        <?php if(hasRole('mwanakikundi')): ?>
+        <div class="dashboard-card">
+            <h2><i class="fas fa-user"></i> Taarifa Zangu</h2>
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+                <div class="stat-card">
+                    <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
+                    <div class="number"><?php echo number_format($user['savings']); ?></div>
+                    <div class="label">Akiba Yangu</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="number"><?php 
+                        $my_total_loan = array_sum(array_column($my_loans, 'amount'));
+                        $my_total_repaid = array_sum(array_column($my_loans, 'repaid'));
+                        echo number_format($my_total_loan - $my_total_repaid);
+                    ?></div>
+                    <div class="label">Deni Langu</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="number"><?php echo count($my_loans); ?></div>
+                    <div class="label">Mikopo Yangu</div>
+                </div>
+            </div>
+            
+            <h3>Mikopo Yangu</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kiasi</th>
+                            <th>Kilicholipwa</th>
+                            <th>Deni</th>
+                            <th>Hali</th>
+                            <th>Kitendo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach($my_loans as $loan): 
+                            $remaining = $loan['amount'] - $loan['repaid'];
+                        ?>
+                        <tr>
+                            <td><?php echo number_format($loan['amount']); ?></td>
+                            <td><?php echo number_format($loan['repaid']); ?></td>
+                            <td><?php echo number_format($remaining); ?></td>
+                            <td><span class="badge badge-<?php echo $loan['status']; ?>"><?php echo $loan['status']; ?></span></td>
+                            <td>
+                                <?php if(in_array($loan['status'], ['approved', 'active']) && $remaining > 0): ?>
+                                <form method="POST" style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <input type="hidden" name="action" value="record_repayment">
+                                    <input type="hidden" name="loan_id" value="<?php echo $loan['id']; ?>">
+                                    <input type="number" name="amount" placeholder="Kiasi" style="width: 120px; padding: 5px 10px; border: 2px solid #e2e8f0; border-radius: 10px;" required>
+                                    <button type="submit" class="btn btn-sm btn-success">Lipa</button>
+                                </form>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                        <?php if(empty($my_loans)): ?>
+                        <tr><td colspan="5" style="text-align: center;">Hujawahi kukopa</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Request Loan -->
+            <div style="margin-top: 20px; background: #f1f5f9; padding: 18px; border-radius: 16px;">
+                <h4><i class="fas fa-plus-circle"></i> Omba Mkopo</h4>
+                
+                <div style="background: #e0f2fe; padding: 12px; border-radius: 10px; margin-bottom: 14px;">
+                    <form method="GET" style="display: flex; gap: 10px; align-items: end; flex-wrap: wrap;">
+                        <input type="hidden" name="check_loan" value="1">
+                        <div class="form-group" style="margin-bottom: 0; flex: 1;">
+                            <label style="font-size: 13px;">Angalia kama unastahili</label>
+                            <input type="number" name="amount" placeholder="Weka kiasi" required style="width: 200px;">
+                        </div>
+                        <button type="submit" class="btn btn-sm" style="background: #0d9488; color: white; padding: 8px 20px;">Angalia</button>
+                    </form>
+                    <?php if($eligibility_result): ?>
+                    <div style="margin-top: 10px; padding: 10px; background: <?php echo $eligibility_result['eligible'] ? '#d1fae5' : '#fee2e2'; ?>; border-radius: 8px;">
+                        <strong><?php echo $eligibility_result['eligible'] ? '✅ Unastahili mkopo!' : '❌ Hustahili mkopo'; ?></strong>
+                        <p><?php echo $eligibility_result['reason']; ?></p>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                
+                <form method="POST">
+                    <input type="hidden" name="action" value="request_loan">
+                    <input type="hidden" name="member_id" value="<?php echo $user['id']; ?>">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <input type="number" name="amount" placeholder="Kiasi cha mkopo (TZS)" required>
+                        <input type="number" name="term_months" placeholder="Muda (miezi)" required>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <textarea name="purpose" placeholder="Madhumuni ya mkopo" rows="2" style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 12px;"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 10px;">
+                        <i class="fas fa-paper-plane"></i> Wasilisha Ombi
+                    </button>
+                </form>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Treasurer Full Control -->
+        <?php if(hasRole('mhazina')): ?>
+        <div class="dashboard-card">
+            <h2><i class="fas fa-calculator"></i> Udhibiti Kamili (Mhazina)</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                <button onclick="toggleForm('contributionForm')" class="btn btn-outline" style="width: auto;">
+                    <i class="fas fa-plus-circle"></i> Ongeza Chango
+                </button>
+                <button onclick="toggleForm('loanRequestForm')" class="btn btn-outline" style="width: auto;">
+                    <i class="fas fa-hand-holding-usd"></i> Omba Mkopo
+                </button>
+                <button onclick="toggleForm('repaymentForm')" class="btn btn-outline" style="width: auto;">
+                    <i class="fas fa-hand-holding-heart"></i> Rekodi Malipo
+                </button>
+                <a href="mpesa.php" class="btn btn-outline" style="width: auto;">
+                    <i class="fas fa-mobile-alt"></i> M-PESA
+                </a>
+                <a href="reports.php" class="btn btn-outline" style="width: auto;">
+                    <i class="fas fa-file-pdf"></i> Ripoti
+                </a>
+                <a href="api_token.php" class="btn btn-outline" style="width: auto;">
+                    <i class="fas fa-key"></i> API Token
+                </a>
+            </div>
+            
+            <!-- Contribution Form -->
+            <div id="contributionForm" class="hidden" style="background: #f1f5f9; padding: 18px; border-radius: 14px; margin-bottom: 16px;">
+                <h4><i class="fas fa-plus-circle"></i> Ongeza Chango</h4>
+                <form method="POST">
+                    <input type="hidden" name="action" value="add_contribution">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+                        <select name="member_id" required>
+                            <option value="">--Chagua Mwanakikundi--</option>
+                            <?php foreach($members as $member): ?>
+                            <option value="<?php echo $member['id']; ?>">
+                                <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <input type="number" name="amount" placeholder="Kiasi (TZS)" required>
+                    </div>
+                    <input type="text" name="description" placeholder="Maelezo" style="width: 100%; margin-top: 10px; padding: 10px; border: 2px solid #e2e8f0; border-radius: 12px;">
+                    <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Hifadhi Chango</button>
+                </form>
+            </div>
+            
+            <!-- Loan Request Form -->
+            <div id="loanRequestForm" class="hidden" style="background: #f1f5f9; padding: 18px; border-radius: 14px; margin-bottom: 16px;">
+                <h4><i class="fas fa-hand-holding-usd"></i> Omba Mkopo</h4>
+                <form method="POST">
+                    <input type="hidden" name="action" value="request_loan">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <select name="member_id" required>
+                            <option value="">--Chagua Mwanakikundi--</option>
+                            <?php foreach($members as $member): ?>
+                            <option value="<?php echo $member['id']; ?>">
+                                <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <input type="number" name="amount" placeholder="Kiasi" required>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+                        <input type="number" name="term_months" placeholder="Muda (miezi)" required>
+                        <input type="number" step="0.1" name="interest_rate" placeholder="Riba (%)" value="<?php echo $settings['default_interest_rate']; ?>">
+                    </div>
+                    <textarea name="purpose" placeholder="Madhumuni" rows="2" style="width: 100%; margin-top: 10px; padding: 10px; border: 2px solid #e2e8f0; border-radius: 12px;"></textarea>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 10px;"><i class="fas fa-paper-plane"></i> Wasilisha</button>
+                </form>
+            </div>
+            
+            <!-- Repayment Form -->
+            <div id="repaymentForm" class="hidden" style="background: #f1f5f9; padding: 18px; border-radius: 14px; margin-bottom: 16px;">
+                <h4><i class="fas fa-hand-holding-heart"></i> Rekodi Malipo</h4>
+                <form method="POST">
+                    <input type="hidden" name="action" value="record_repayment">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+                        <select name="loan_id" required>
+                            <option value="">--Chagua Mkopo--</option>
+                            <?php 
+                            $active_loans = getLoans('active');
+                            foreach($active_loans as $loan): 
+                                $remaining = $loan['amount'] - $loan['repaid'];
+                            ?>
+                            <option value="<?php echo $loan['id']; ?>">
+                                <?php echo htmlspecialchars($loan['member_name']); ?> - TZS <?php echo number_format($loan['amount']); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <input type="number" name="amount" placeholder="Kiasi" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 10px;"><i class="fas fa-save"></i> Hifadhi</button>
+                </form>
+            </div>
+            
+            <!-- Full Data -->
+            <h3>Orodha Kamili ya Wanakikundi</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mwanakikundi</th>
+                            <th>Jukumu</th>
+                            <th>Akiba</th>
+                            <th>Chango</th>
+                            <th>Mikopo</th>
+                            <th>Deni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $contributions_all = getContributions();
+                        foreach($members as $member): 
+                            $member_contrib = array_sum(array_column(array_filter($contributions_all, function($c) use($member) {
+                                return $c['member_id'] == $member['id'];
+                            }), 'amount'));
+                            $member_loans = getMemberLoans($member['id']);
+                            $total_loan = array_sum(array_column($member_loans, 'amount'));
+                            $total_repaid = array_sum(array_column($member_loans, 'repaid'));
+                            $debt = $total_loan - $total_repaid;
+                        ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?></td>
+                            <td><span class="badge badge-<?php echo $member['role']; ?>"><?php echo $member['role']; ?></span></td>
+                            <td><?php echo number_format($member['savings']); ?></td>
+                            <td><?php echo number_format($member_contrib); ?></td>
+                            <td><?php echo number_format($total_loan); ?></td>
+                            <td><?php echo number_format($debt); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Pending Loans Approval -->
+        <?php if(hasRole(['mwenyekiti', 'mhazina', 'mkaguzi']) && !empty($pending_loans)): ?>
+        <div class="dashboard-card" style="border-left: 4px solid #f59e0b;">
+            <h2><i class="fas fa-check-double" style="color: #f59e0b;"></i> Idhini ya Mikopo</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mkopaji</th>
+                            <th>Kiasi</th>
+                            <th>Muda</th>
+                            <th>Madhumuni</th>
+                            <th>Kitendo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach($pending_loans as $loan): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($loan['member_name']); ?></td>
+                            <td><?php echo number_format($loan['amount']); ?></td>
+                            <td><?php echo $loan['term_months']; ?> miezi</td>
+                            <td><?php echo htmlspecialchars(substr($loan['purpose'] ?? '', 0, 30)); ?>...</td>
+                            <td>
+                                <form method="POST" style="display: inline;">
+                                    <input type="hidden" name="action" value="approve_loan">
+                                    <input type="hidden" name="loan_id" value="<?php echo $loan['id']; ?>">
+                                    <button type="submit" class="btn btn-sm btn-success"><i class="fas fa-check"></i></button>
+                                </form>
+                                <form method="POST" style="display: inline;">
+                                    <input type="hidden" name="action" value="reject_loan">
+                                    <input type="hidden" name="loan_id" value="<?php echo $loan['id']; ?>">
+                                    <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-times"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Roles & Responsibilities -->
+        <div class="dashboard-card">
+            <h2><i class="fas fa-users-cog"></i> Majukumu ya Viongozi</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                <?php 
+                $role_info = [
+                    'mwenyekiti' => ['icon' => 'fa-crown', 'color' => '#1e3a8a'],
+                    'katibu' => ['icon' => 'fa-pen', 'color' => '#854d0e'],
+                    'mhazina' => ['icon' => 'fa-calculator', 'color' => '#0d9488'],
+                    'mkaguzi' => ['icon' => 'fa-search', 'color' => '#7e22ce'],
+                    'mwanakikundi' => ['icon' => 'fa-user', 'color' => '#475569']
+                ];
+                foreach($role_info as $role => $info): 
+                ?>
+                <div style="background: #f8fafc; padding: 14px; border-radius: 14px; border-left: 4px solid <?php echo $info['color']; ?>;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                        <i class="fas <?php echo $info['icon']; ?>" style="color: <?php echo $info['color']; ?>;"></i>
+                        <strong style="text-transform: uppercase; color: <?php echo $info['color']; ?>; font-size: 14px;">
+                            <?php echo str_replace('_', ' ', $role); ?>
+                        </strong>
+                    </div>
+                    <p style="color: #475569; font-size: 13px; margin: 0;"><?php echo getRoleDescription($role); ?></p>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleForm(formId) {
+            const form = document.getElementById(formId);
+            if(form) form.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>
