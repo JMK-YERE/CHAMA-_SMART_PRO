@@ -1,0 +1,20 @@
+# .htaccess - Usalama wa mfumo
+<Files "config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<Files ".env">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Enable HTTPS redirect
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Protect sensitive directories
+RedirectMatch 403 ^/database/.*$
+RedirectMatch 403 ^/includes/.*$
+RedirectMatch 403 ^/vendor/.*$
