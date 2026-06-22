@@ -1,5 +1,5 @@
 <?php
-// login.php
+// login.php - Bila Encryption (Password inalinganishwa moja kwa moja)
 require_once 'config.php';
 
 if($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -15,7 +15,11 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$phone]);
     $user = $stmt->fetch();
     
-    if($user && password_verify($password, $user['password'])) {
+    // ============================================
+    // BADILISHA HAPA - ONDOA PASSWORD_VERIFY
+    // Sasa inalinganisha password moja kwa moja
+    // ============================================
+    if($user && $password == $user['password']) {
         $stmt = $pdo->prepare("UPDATE wanakikundi SET last_login = NOW() WHERE id = ?");
         $stmt->execute([$user['id']]);
         
